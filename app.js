@@ -31,6 +31,15 @@ const logoutAccountBtn = document.getElementById('logoutAccount');
 const lastLoginEl = document.getElementById('lastLogin');
 const signupDateEl = document.getElementById('signupDate');
 
+function showAccountModal() {
+  document.getElementById('accountModal').style.display = 'flex';
+  document.body.classList.add('modal-open');
+}
+function hideAccountModal() {
+  document.getElementById('accountModal').style.display = 'none';
+  document.body.classList.remove('modal-open');
+}
+
 (function() {
   const animatedFooter = document.getElementById('animatedFooter');
   let hasAnimated = false;
