@@ -534,13 +534,24 @@ function generateCombos(n=30, seed=''){
 
 // ==== Boutons Générer / Export ====
 btnGenerate.addEventListener('click', ()=>{
+    if(generateCooldown) return; // Cooldown en cours, on ignore les clics
     if(draws.length===0){ alert("Importer CSV d'abord."); return; }
+
+    // Remplace le contenu du bouton par le loader
+    btnGenerate.disabled = true;
+    btnGenerate.innerHTML = `
+      <span class="loader-circle"></span>
+      <span class="countdown-text"></span>
+    `;
+
     showLoader();
+
     setTimeout(()=>{
         const n = +document.getElementById('nCombos').value;
         const seed = document.getElementById('seed').value;
         const combos = generateCombos(n, seed);
-        resultsEl.innerHTML=''; recommendationEl.innerHTML='';
+        resultsEl.innerHTML='';
+        recommendationEl.innerHTML='';
         combos.forEach((c,i)=>{
             const div=document.createElement('div'); div.className='combo';
             div.innerHTML=`<div class="balls">${c.nums.map(v=>`<div class="ball">${v}</div>`).join('')}<div class="ball chance">${c.chance}</div></div><div class="small">Pattern:${c.pattern} • Score:${c.score.toFixed(1)}</div>`;
@@ -553,6 +564,23 @@ btnGenerate.addEventListener('click', ()=>{
             resultsEl.appendChild(div);
         });
         showLoader(false);
+
+        // Countdown de 60 secondes
+        let seconds = 60;
+        const countdownText = btnGenerate.querySelector('.countdown-text');
+        countdownText.textContent = `• Disponibilité dans ${seconds}s`;
+
+        generateCooldown = setInterval(()=>{
+          seconds--;
+          countdownText.textContent = `• Disponibilité dans ${seconds}s`;
+          if(seconds <= 0) {
+            clearInterval(generateCooldown);
+            generateCooldown = null;
+            btnGenerate.disabled = false;
+            btnGenerate.innerHTML = 'Générer';
+          }
+        }, 1000);
+
     },50);
 });
 
