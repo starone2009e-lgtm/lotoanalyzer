@@ -533,55 +533,66 @@ function generateCombos(n=30, seed=''){
 }
 
 // ==== Boutons Générer / Export ====
-btnGenerate.addEventListener('click', ()=>{
-    if(generateCooldown) return; // Cooldown en cours, on ignore les clics
-    if(draws.length===0){ alert("Importer CSV d'abord."); return; }
+let generateCooldown = null;
 
-    // Remplace le contenu du bouton par le loader
+btnGenerate.addEventListener('click', () => {
+    if (generateCooldown) return;
+
+    if (!draws || draws.length === 0) {
+        alert("Importer CSV d'abord.");
+        return;
+    }
+
     btnGenerate.disabled = true;
+    btnGenerate.classList.add('btn-countdown');
     btnGenerate.innerHTML = `
-      <span class="loader-circle"></span>
-      <span class="countdown-text"></span>
+      <span class="loader-circle" style="vertical-align: middle;"></span>
+      <span class="countdown-text" style="vertical-align: middle;"></span>
     `;
+
+    // Countdown de 60 secondes au format MM:SS
+    let seconds = 60;
+    const countdownText = btnGenerate.querySelector('.countdown-text');
+    countdownText.textContent = `1:00`;
 
     showLoader();
 
-    setTimeout(()=>{
+    setTimeout(() => {
         const n = +document.getElementById('nCombos').value;
         const seed = document.getElementById('seed').value;
         const combos = generateCombos(n, seed);
-        resultsEl.innerHTML='';
-        recommendationEl.innerHTML='';
-        combos.forEach((c,i)=>{
-            const div=document.createElement('div'); div.className='combo';
-            div.innerHTML=`<div class="balls">${c.nums.map(v=>`<div class="ball">${v}</div>`).join('')}<div class="ball chance">${c.chance}</div></div><div class="small">Pattern:${c.pattern} • Score:${c.score.toFixed(1)}</div>`;
-            if(i<5){
+        resultsEl.innerHTML = '';
+        recommendationEl.innerHTML = '';
+        combos.forEach((c, i) => {
+            const div = document.createElement('div');
+            div.className = 'combo';
+            div.innerHTML = `<div class="balls">${c.nums.map(v => `<div class="ball">${v}</div>`).join('')}<div class="ball chance">${c.chance}</div></div><div class="small">Pattern:${c.pattern} • Score:${c.score.toFixed(1)}</div>`;
+            if (i < 5) {
                 div.classList.add('highlight');
-                const chanceBall=div.querySelector('.ball.chance');
-                if(chanceBall) chanceBall.classList.add('highlight-chance');
+                const chanceBall = div.querySelector('.ball.chance');
+                if (chanceBall) chanceBall.classList.add('highlight-chance');
                 recommendationEl.appendChild(div.cloneNode(true));
             }
             resultsEl.appendChild(div);
         });
         showLoader(false);
 
-        // Countdown de 60 secondes
-        let seconds = 60;
-        const countdownText = btnGenerate.querySelector('.countdown-text');
-        countdownText.textContent = `• Disponibilité dans ${seconds}s`;
-
-        generateCooldown = setInterval(()=>{
-          seconds--;
-          countdownText.textContent = `• Disponibilité dans ${seconds}s`;
-          if(seconds <= 0) {
-            clearInterval(generateCooldown);
-            generateCooldown = null;
-            btnGenerate.disabled = false;
-            btnGenerate.innerHTML = 'Générer';
-          }
+        generateCooldown = setInterval(() => {
+            seconds--;
+            let min = Math.floor(seconds / 60);
+            let sec = seconds % 60;
+            let time = `${min}:${sec.toString().padStart(2, '0')}`;
+            countdownText.textContent = `${time}`;
+            if (seconds <= 0) {
+                clearInterval(generateCooldown);
+                generateCooldown = null;
+                btnGenerate.disabled = false;
+                btnGenerate.classList.remove('btn-countdown');
+                btnGenerate.innerHTML = 'Générer';
+            }
         }, 1000);
 
-    },50);
+    }, 50);
 });
 
 btnExport.addEventListener('click', ()=>{
