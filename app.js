@@ -156,7 +156,7 @@ function clearUserToken(){
 }
 function logout(){
     clearUserToken();
-    window.location.href = "index.html";
+    window.location.href = "login.html";
 }
 
 // ========== Redirection expiration token ==========
